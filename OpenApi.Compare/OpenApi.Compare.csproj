@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.0.1</Version>
+    <Authors>Andrew Rissing</Authors>
+    <Company />
+    <Description>The OpenApi.Compare library provides a means to compare OpenAPI specifications.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>© Andrew Rissing. All rights reserved.</Copyright>
+    <PackageProjectUrl>https://github.com/AndrewRissing/OpenApi.Compare</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AndrewRissing/OpenApi.Compare</RepositoryUrl>
+    <PackageTags>OpenAPI Compare Diff .NET</PackageTags>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>C:\Projects\OpenApi.Compare\OpenApi.Compare\OpenApi.Compare.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>C:\Projects\OpenApi.Compare\OpenApi.Compare\OpenApi.Compare.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.2.2" />
+  </ItemGroup>
+
+</Project>
