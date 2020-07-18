@@ -1,4 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
+using OpenApi.Compare.Models;
 using System.Collections.Generic;
 
 namespace OpenApi.Compare
@@ -9,9 +10,9 @@ namespace OpenApi.Compare
     public class ComparisonReport
     {
         /// <summary>
-        /// The overall <see cref="ChangeType"/> determined by the comparison.
+        /// The overall <see cref="Compatibility"/> determined by the comparison.
         /// </summary>
-        public ChangeType OverallChangeType { get; set; }
+        public Compatibility OverallCompatibility { get; set; }
 
         /// <summary>
         /// The <see cref="OpenApiDocument"/> before the change.
