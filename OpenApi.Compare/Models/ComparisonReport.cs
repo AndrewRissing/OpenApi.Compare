@@ -10,6 +10,15 @@ namespace OpenApi.Compare
     public class ComparisonReport
     {
         /// <summary>
+        /// Creates a new instance of the <see cref="ComparisonReport"/>.
+        /// </summary>
+        public ComparisonReport()
+        {
+            this.OverallCompatibility = Compatibility.NoChange;
+            this.Changes = new List<Change>();
+        }
+
+        /// <summary>
         /// The overall <see cref="Compatibility"/> determined by the comparison.
         /// </summary>
         public Compatibility OverallCompatibility { get; set; }

@@ -10,6 +10,11 @@ namespace OpenApi.Compare
     public class Change
     {
         /// <summary>
+        /// The <see cref="Compatibility"/> of the <see cref="Change"/>.
+        /// </summary>
+        public Compatibility Compatibility { get; set; }
+
+        /// <summary>
         /// The <see cref="ChangeType"/> determined by the comparison.
         /// </summary>
         public ChangeType ChangeType { get; set; }

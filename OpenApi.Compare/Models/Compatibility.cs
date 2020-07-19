@@ -6,9 +6,14 @@
     public enum Compatibility
     {
         /// <summary>
+        /// No changes were detected.
+        /// </summary>
+        NoChange = 0,
+
+        /// <summary>
         /// The change would not impact client behavior.
         /// </summary>
-        Backwards = 0,
+        Backwards,
 
         /// <summary>
         /// The change would impact client behavior.

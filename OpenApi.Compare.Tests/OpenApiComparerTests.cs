@@ -41,25 +41,59 @@ namespace OpenApi.Compare.Tests
         [MemberData(nameof(ScenarioData))]
         private void Scenarios(OpenApiDocument before, OpenApiDocument after, ComparisonReport expected)
         {
-            // TODO: Flesh this out.
+            var actual = OpenApiComparer.Compare(before, after);
+
+            Assert.NotNull(actual);
+            Assert.NotSame(expected, actual);
+            Assert.Same(before, actual.Before);
+            Assert.Same(after, actual.After);
+            Assert.Equal(expected.OverallCompatibility, actual.OverallCompatibility);
+            Assert.NotNull(actual.Changes);
+            Assert.Equal(expected.Changes.Count, actual.Changes.Count);
+
+            for (var i = 0; i < actual.Changes.Count; ++i)
+            {
+                var expectedChange = expected.Changes[i];
+                var actualChange = actual.Changes[i];
+
+                Assert.NotSame(expectedChange, actualChange);
+                Assert.NotNull(actualChange);
+                Assert.Equal(expectedChange.ActionType, actualChange.ActionType);
+                Assert.Same(expectedChange.After, actualChange.After);
+                Assert.Same(expectedChange.Before, actualChange.Before);
+                Assert.Equal(expectedChange.ChangeType, actualChange.ChangeType);
+                Assert.Equal(expectedChange.Compatibility, actualChange.Compatibility);
+                Assert.Equal(expectedChange.OperationType, actualChange.OperationType);
+                Assert.Equal(expectedChange.Path, actualChange.Path);
+            }
         }
 
         public static IEnumerable<object[]> ScenarioData()
         {
-            var scenarios = new Tuple<Action<OpenApiDocument>, ComparisonReport>[]
+            var scenarios = new Tuple<Action<OpenApiDocument>, ComparisonReport, ComparisonReport>[]
             {
-                Tuple.Create<Action<OpenApiDocument>, ComparisonReport>
+                Tuple.Create<Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
                     (x) =>
                     {
                         x.Paths["/blahblah"] = new OpenApiPathItem()
                         {
-
+                            Operations =
+                            {
+                                {
+                                    OperationType.Get, new OpenApiOperation()
+                                    {
+                                        
+                                    }
+                                }
+                            }
                         };
                     },
                     new ComparisonReport()
                     {
-
+                    },
+                    new ComparisonReport()
+                    {
                     }
                 ),
             };
@@ -72,25 +106,24 @@ namespace OpenApi.Compare.Tests
                 var after = GetSample("PetStore");
                 scenario.Item1(after);
 
+                var report = scenario.Item2;
+                report.Before = before;
+                report.After = after;
+
                 yield return new object[] { before, after, scenario.Item2 };
 
-                // Update the report to swap its findings.
-                var reversedComparisonReport = ReverseComparisonReport(scenario.Item2);
+                // Rerun the test reversing before/after, using the reversed report.
+                var reversedReport = scenario.Item3;
+                reversedReport.Before = after;
+                reversedReport.After = before;
 
-                // Rerun the test reversing before/after.
-                yield return new object[] { after, before, reversedComparisonReport };
+                yield return new object[] { after, before, reversedReport };
             }
         }
 
         private static OpenApiDocument GetSample(string name)
         {
             return dctSamples[name];
-        }
-
-        public static ComparisonReport ReverseComparisonReport(ComparisonReport comparisonReport)
-        {
-            // TODO: Fix this.
-            return null;
         }
     }
 }
