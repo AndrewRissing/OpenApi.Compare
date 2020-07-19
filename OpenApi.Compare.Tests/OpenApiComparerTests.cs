@@ -1,15 +1,45 @@
 using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Readers;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using Xunit;
 
 namespace OpenApi.Compare.Tests
 {
     public class OpenApiComparerTests
     {
+        // TODO: Do we need multiple?
+        private static Dictionary<string, OpenApiDocument> dctSamples;
+
+        static OpenApiComparerTests()
+        {
+            dctSamples = new Dictionary<string, OpenApiDocument>();
+
+            var assembly = typeof(OpenApiComparerTests).Assembly;
+
+            foreach (var resourceName in assembly.GetManifestResourceNames())
+            {
+                var shortName = resourceName.Replace("OpenApi.Compare.Tests.Samples.", string.Empty).Replace(".json", string.Empty);
+                var openApiDocument = GetOpenApiDocumentFromResource(assembly, resourceName);
+
+                dctSamples[shortName] = openApiDocument;
+            }
+        }
+
+        private static OpenApiDocument GetOpenApiDocumentFromResource(Assembly assembly, string resourceName)
+        {
+            using (var stream = assembly.GetManifestResourceStream(resourceName))
+            using (var reader = new StreamReader(stream))
+            {
+                return new OpenApiStreamReader().Read(stream, out var _);
+            }
+        }
+
         [Theory]
         [MemberData(nameof(ScenarioData))]
-        public void Scenarios_Forward(OpenApiDocument before, OpenApiDocument after, ComparisonReport expected)
+        private void Scenarios(OpenApiDocument before, OpenApiDocument after, ComparisonReport expected)
         {
             // TODO: Flesh this out.
         }
@@ -36,10 +66,10 @@ namespace OpenApi.Compare.Tests
 
             foreach (var scenario in scenarios)
             {
-                var before = CreateStandardOpenApiDocument();
+                var before = GetSample("PetStore");
 
                 // Mutate the after.
-                var after = CreateStandardOpenApiDocument();
+                var after = GetSample("PetStore");
                 scenario.Item1(after);
 
                 yield return new object[] { before, after, scenario.Item2 };
@@ -52,10 +82,9 @@ namespace OpenApi.Compare.Tests
             }
         }
 
-        public static OpenApiDocument CreateStandardOpenApiDocument()
+        private static OpenApiDocument GetSample(string name)
         {
-            // TODO: Fix this.
-            return null;
+            return dctSamples[name];
         }
 
         public static ComparisonReport ReverseComparisonReport(ComparisonReport comparisonReport)
