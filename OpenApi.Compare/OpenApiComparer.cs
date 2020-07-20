@@ -153,14 +153,13 @@ namespace OpenApi.Compare
             }
             else
             {
-                CompareValue(changes, before, after, ChangeType.Description, Compatibility.Backwards, x => x.Description);
-                CompareValue(changes, before, after, ChangeType.ParameterIn, Compatibility.Breaking, x => x.In.Value); // TODO: Required but nullable?
+                CompareValue(changes, before, after, ChangeType.ParameterAllowEmptyValue, (before.AllowEmptyValue) ? Compatibility.Breaking : Compatibility.Backwards, x => x.AllowEmptyValue);
                 CompareValue(changes, before, after, ChangeType.Deprecated, Compatibility.Backwards, x => x.Deprecated);
-                CompareValue(changes, before, after, ChangeType.ParameterRequired, (!before.Required) ? Compatibility.Breaking : Compatibility.Backwards, x => x.Required);
+                CompareValue(changes, before, after, ChangeType.Description, Compatibility.Backwards, x => x.Description);
+                CompareValue(changes, before, after, ChangeType.ParameterIn, Compatibility.Breaking, x => x.In);
+                CompareValue(changes, before, after, ChangeType.ParameterRequired, (before.Required) ? Compatibility.Backwards : Compatibility.Breaking, x => x.Required);
 
-                // TODO: Compare OpenApiParameter properties.
-                // AllowEmptyValue
-                // Content
+                // TODO: Compare Content.
             }
         }
 
@@ -196,6 +195,28 @@ namespace OpenApi.Compare
             // Either one is null and the other isn't or they have differing values.
             if (((beforeValue != null) ^ (afterValue != null))
                 || ((beforeValue != null) && (afterValue != null) && (beforeValue.CompareTo(afterValue) != 0)))
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Modified,
+                    ChangeType = changeType,
+                    Compatibility = compatibility,
+                    Before = before,
+                    After = after,
+                });
+            }
+        }
+
+        private static void CompareValue<T, TValue>(List<Change> changes, T before, T after, ChangeType changeType, Compatibility compatibility, Func<T, TValue?> getValue)
+            where T : IOpenApiElement
+            where TValue : struct, IComparable
+        {
+            var beforeValue = getValue(before);
+            var afterValue = getValue(after);
+
+            // Either one is null and the other isn't or they have differing values.
+            if (((beforeValue.HasValue) ^ (afterValue.HasValue))
+                || (beforeValue.HasValue && afterValue.HasValue && (beforeValue.Value.CompareTo(afterValue.Value) != 0)))
             {
                 changes.Add(new Change()
                 {

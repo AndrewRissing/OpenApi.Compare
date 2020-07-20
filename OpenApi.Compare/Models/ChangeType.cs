@@ -14,19 +14,9 @@ namespace OpenApi.Compare
         //Path = 0,
 
         /// <summary>
-        /// An <see cref="OpenApiPathItem"/> was changed.
+        /// The deprecated status of the provided <see cref="IOpenApiElement"/> was changed.
         /// </summary>
-        Operation = 0,
-
-        /// <summary>
-        /// A <see cref="OpenApiParameter"/> was changed.
-        /// </summary>
-        Parameter,
-
-        /// <summary>
-        /// The summary of the provided <see cref="IOpenApiElement"/> was changed.
-        /// </summary>
-        Summary,
+        Deprecated,
 
         /// <summary>
         /// The description of the provided <see cref="IOpenApiElement"/> was changed.
@@ -34,18 +24,33 @@ namespace OpenApi.Compare
         Description,
 
         /// <summary>
-        /// The location of a <see cref="OpenApiParameter"/> was changed.
+        /// An <see cref="OpenApiPathItem"/> was changed.
+        /// </summary>
+        Operation,
+
+        /// <summary>
+        /// A <see cref="OpenApiParameter"/> was changed.
+        /// </summary>
+        Parameter,
+
+        /// <summary>
+        /// The <see cref="OpenApiParameter.AllowEmptyValue"/> of a <see cref="OpenApiParameter"/> was changed.
+        /// </summary>
+        ParameterAllowEmptyValue,
+
+        /// <summary>
+        /// The <see cref="OpenApiParameter.In"/> of a <see cref="OpenApiParameter"/> was changed.
         /// </summary>
         ParameterIn,
 
         /// <summary>
-        /// The required status of a <see cref="OpenApiParameter"/> was changed.
+        /// The <see cref="OpenApiParameter.Required"/> of a <see cref="OpenApiParameter"/> was changed.
         /// </summary>
         ParameterRequired,
 
         /// <summary>
-        /// The deprecated status of the provided <see cref="IOpenApiElement"/> was changed.
+        /// The summary of the provided <see cref="IOpenApiElement"/> was changed.
         /// </summary>
-        Deprecated,
+        Summary,
     }
 }

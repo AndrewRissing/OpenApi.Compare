@@ -371,6 +371,49 @@ namespace OpenApi.Compare.Tests
                         }
                     }
                 ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Parameter - AllowEmptyValue",
+                    (x) =>
+                    {
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].AllowEmptyValue = true;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterAllowEmptyValue,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterAllowEmptyValue,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
             };
 
             foreach (var scenario in scenarios)
