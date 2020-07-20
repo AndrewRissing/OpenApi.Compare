@@ -24,6 +24,11 @@ namespace OpenApi.Compare
         Parameter,
 
         /// <summary>
+        /// The summary of the provided <see cref="IOpenApiElement"/> was changed.
+        /// </summary>
+        Summary,
+
+        /// <summary>
         /// The description of the provided <see cref="IOpenApiElement"/> was changed.
         /// </summary>
         Description,
@@ -42,20 +47,5 @@ namespace OpenApi.Compare
         /// The deprecated status of the provided <see cref="IOpenApiElement"/> was changed.
         /// </summary>
         Deprecated,
-
-        ///// <summary>
-        ///// TODO: Figure out what to do about this.
-        ///// </summary>
-        //Documentation, // TODO: Might be too generic (Summary, Description, etc.?)
-
-        //Operation,
-
-        //Response,
-
-        //RequestBody,
-
-        //Parameter,
-
-        //Tag
     }
 }

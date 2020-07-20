@@ -1,11 +1,11 @@
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
+using NUnit.Framework;
 using OpenApi.Compare.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Xunit;
 
 namespace OpenApi.Compare.Tests
 {
@@ -38,28 +38,27 @@ namespace OpenApi.Compare.Tests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(ScenarioData))]
-        private void Scenarios(OpenApiDocument before, OpenApiDocument after, ComparisonReport expected)
+        [TestCaseSource(nameof(SimpleScenariosData))]
+        public void SimpleScenarios(OpenApiDocument before, OpenApiDocument after, ComparisonReport expected)
         {
             var actual = OpenApiComparer.Compare(before, after);
 
-            Assert.NotNull(actual);
-            Assert.NotSame(expected, actual);
-            Assert.Same(before, actual.Before);
-            Assert.Same(after, actual.After);
-            Assert.Equal(expected.OverallCompatibility, actual.OverallCompatibility);
+            Assert.IsNotNull(actual);
+            Assert.AreNotSame(expected, actual);
+            Assert.AreSame(before, actual.Before);
+            Assert.AreSame(after, actual.After);
+            Assert.AreEqual(expected.OverallCompatibility, actual.OverallCompatibility);
             Assert.NotNull(actual.Changes);
-            Assert.Equal(expected.Changes.Count, actual.Changes.Count);
+            Assert.AreEqual(expected.Changes.Count, actual.Changes.Count);
 
             for (var i = 0; i < actual.Changes.Count; ++i)
             {
                 var expectedChange = expected.Changes[i];
                 var actualChange = actual.Changes[i];
 
-                Assert.NotSame(expectedChange, actualChange);
+                Assert.AreNotSame(expectedChange, actualChange);
                 Assert.NotNull(actualChange);
-                Assert.Equal(expectedChange.ActionType, actualChange.ActionType);
+                Assert.AreEqual(expectedChange.ActionType, actualChange.ActionType);
 
                 if (expectedChange.Before == null)
                 {
@@ -68,7 +67,7 @@ namespace OpenApi.Compare.Tests
                 else
                 {
                     Assert.NotNull(actualChange.Before);
-                    Assert.Same(expectedChange.Before.GetType(), actualChange.Before.GetType()); // TODO: Check more than type?
+                    Assert.AreSame(expectedChange.Before.GetType(), actualChange.Before.GetType()); // TODO: Check more than type?
                 }
 
                 if (expectedChange.After == null)
@@ -78,23 +77,23 @@ namespace OpenApi.Compare.Tests
                 else
                 {
                     Assert.NotNull(actualChange.After);
-                    Assert.Same(expectedChange.After.GetType(), actualChange.After.GetType()); // TODO: Check more than type?
+                    Assert.AreSame(expectedChange.After.GetType(), actualChange.After.GetType()); // TODO: Check more than type?
                 }
 
-                Assert.Equal(expectedChange.ChangeType, actualChange.ChangeType);
-                Assert.Equal(expectedChange.Compatibility, actualChange.Compatibility);
-                Assert.Equal(expectedChange.OperationType, actualChange.OperationType);
-                Assert.Equal(expectedChange.Path, actualChange.Path);
+                Assert.AreEqual(expectedChange.ChangeType, actualChange.ChangeType);
+                Assert.AreEqual(expectedChange.Compatibility, actualChange.Compatibility);
+                Assert.AreEqual(expectedChange.OperationType, actualChange.OperationType);
+                Assert.AreEqual(expectedChange.Path, actualChange.Path);
             }
         }
 
-        public static IEnumerable<object[]> ScenarioData()
+        public static IEnumerable<TestCaseData> SimpleScenariosData()
         {
-            var scenarios = new Tuple<Action<OpenApiDocument>, ComparisonReport, ComparisonReport>[]
+            var scenarios = new Tuple<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>[]
             {
-                // No change.
-                Tuple.Create<Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
+                    "No change",
                     (x) =>
                     {
                         // Do nothing.
@@ -103,9 +102,9 @@ namespace OpenApi.Compare.Tests
                     new ComparisonReport() { OverallCompatibility = Compatibility.NoChange }
                 ),
 
-                // Add/Removing Paths
-                Tuple.Create<Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
+                    "Operation",
                     (x) =>
                     {
                         x.Paths["/new"] = new OpenApiPathItem()
@@ -154,9 +153,9 @@ namespace OpenApi.Compare.Tests
                     }
                 ),
 
-                // Add/Removing Parameters
-                Tuple.Create<Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
+                    "Parameter",
                     (x) =>
                     {
                         x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters.Add(new OpenApiParameter()
@@ -201,10 +200,177 @@ namespace OpenApi.Compare.Tests
                     }
                 ),
 
-                // TODO: Description
-                // TODO: ParameterIn
-                // TODO: Parameter - Deprecated
-                // TODO: Parameter - Required
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Parameter - Description",
+                    (x) =>
+                    {
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].Description = "Something new";
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Description,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Description,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Parameter - In",
+                    (x) =>
+                    {
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].In = ParameterLocation.Header;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterIn,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterIn,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Parameter - Deprecated",
+                    (x) =>
+                    {
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].Deprecated = true;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Deprecated,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Deprecated,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Parameter - Required",
+                    (x) =>
+                    {
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].Required = false;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterRequired,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterRequired,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
             };
 
             foreach (var scenario in scenarios)
@@ -213,20 +379,20 @@ namespace OpenApi.Compare.Tests
 
                 // Mutate the after.
                 var after = GetSample("PetStore");
-                scenario.Item1(after);
+                scenario.Item2(after);
 
-                var report = scenario.Item2;
+                var report = scenario.Item3;
                 report.Before = before;
                 report.After = after;
 
-                yield return new object[] { before, after, scenario.Item2 };
+                yield return new TestCaseData(before, after, scenario.Item3).SetName($"{{m}} ({scenario.Item1})");
 
                 // Rerun the test reversing before/after, using the reversed report.
-                var reversedReport = scenario.Item3;
+                var reversedReport = scenario.Item4;
                 reversedReport.Before = after;
                 reversedReport.After = before;
 
-                yield return new object[] { after, before, reversedReport };
+                yield return new TestCaseData(after, before, reversedReport).SetName($"{{m}} ({scenario.Item1} - Reversed)");
             }
         }
 

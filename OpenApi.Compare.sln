@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenApi.Compare", "OpenApi.Compare\OpenApi.Compare.csproj", "{695F1473-505A-49A6-AF9E-05EDC87254D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenApi.Compare.Tests", "OpenApi.Compare.Tests\OpenApi.Compare.Tests.csproj", "{55F1E181-C26E-48A1-952B-EEC3373C0F75}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenApi.Compare.Tests", "OpenApi.Compare.Tests\OpenApi.Compare.Tests.csproj", "{77A1AA18-0D2B-4C70-BC82-8B554600F99A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{695F1473-505A-49A6-AF9E-05EDC87254D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{695F1473-505A-49A6-AF9E-05EDC87254D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{695F1473-505A-49A6-AF9E-05EDC87254D4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{55F1E181-C26E-48A1-952B-EEC3373C0F75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{55F1E181-C26E-48A1-952B-EEC3373C0F75}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{55F1E181-C26E-48A1-952B-EEC3373C0F75}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{55F1E181-C26E-48A1-952B-EEC3373C0F75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77A1AA18-0D2B-4C70-BC82-8B554600F99A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77A1AA18-0D2B-4C70-BC82-8B554600F99A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77A1AA18-0D2B-4C70-BC82-8B554600F99A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77A1AA18-0D2B-4C70-BC82-8B554600F99A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

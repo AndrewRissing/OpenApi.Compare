@@ -155,7 +155,7 @@ namespace OpenApi.Compare
             {
                 CompareValue(changes, before, after, ChangeType.Description, Compatibility.Backwards, x => x.Description);
                 CompareValue(changes, before, after, ChangeType.ParameterIn, Compatibility.Breaking, x => x.In.Value); // TODO: Required but nullable?
-                CompareValue(changes, before, after, ChangeType.Deprecated, (!before.Deprecated) ? Compatibility.Breaking : Compatibility.Backwards, x => x.Deprecated);
+                CompareValue(changes, before, after, ChangeType.Deprecated, Compatibility.Backwards, x => x.Deprecated);
                 CompareValue(changes, before, after, ChangeType.ParameterRequired, (!before.Required) ? Compatibility.Breaking : Compatibility.Backwards, x => x.Required);
 
                 // TODO: Compare OpenApiParameter properties.
@@ -193,7 +193,9 @@ namespace OpenApi.Compare
             var beforeValue = getValue(before);
             var afterValue = getValue(after);
 
-            if (beforeValue.CompareTo(afterValue) == 0)
+            // Either one is null and the other isn't or they have differing values.
+            if (((beforeValue != null) ^ (afterValue != null))
+                || ((beforeValue != null) && (afterValue != null) && (beforeValue.CompareTo(afterValue) != 0)))
             {
                 changes.Add(new Change()
                 {
