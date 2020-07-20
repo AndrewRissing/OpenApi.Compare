@@ -65,6 +65,7 @@ namespace OpenApi.Compare
                 CompareOpenApiOperations
             );
 
+            // Set the path for any changes produced from subsequent calls.
             foreach (var change in pathChanges)
                 change.Path = path;
 
@@ -100,7 +101,6 @@ namespace OpenApi.Compare
             else
             {
                 // TODO: Compare OpenApiOperation properties.
-                // operationChanges
             }
         }
 
