@@ -1,5 +1,6 @@
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
+using OpenApi.Compare.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,29 +12,29 @@ namespace OpenApi.Compare.Tests
     public class OpenApiComparerTests
     {
         // TODO: Do we need multiple?
-        private static Dictionary<string, OpenApiDocument> dctSamples;
+        private static Dictionary<string, string> dctSamples;
 
         static OpenApiComparerTests()
         {
-            dctSamples = new Dictionary<string, OpenApiDocument>();
+            dctSamples = new Dictionary<string, string>();
 
             var assembly = typeof(OpenApiComparerTests).Assembly;
 
             foreach (var resourceName in assembly.GetManifestResourceNames())
             {
                 var shortName = resourceName.Replace("OpenApi.Compare.Tests.Samples.", string.Empty).Replace(".json", string.Empty);
-                var openApiDocument = GetOpenApiDocumentFromResource(assembly, resourceName);
+                var content = GetStringFromResource(assembly, resourceName);
 
-                dctSamples[shortName] = openApiDocument;
+                dctSamples[shortName] = content;
             }
         }
 
-        private static OpenApiDocument GetOpenApiDocumentFromResource(Assembly assembly, string resourceName)
+        private static string GetStringFromResource(Assembly assembly, string resourceName)
         {
             using (var stream = assembly.GetManifestResourceStream(resourceName))
             using (var reader = new StreamReader(stream))
             {
-                return new OpenApiStreamReader().Read(stream, out var _);
+                return reader.ReadToEnd();
             }
         }
 
@@ -59,8 +60,27 @@ namespace OpenApi.Compare.Tests
                 Assert.NotSame(expectedChange, actualChange);
                 Assert.NotNull(actualChange);
                 Assert.Equal(expectedChange.ActionType, actualChange.ActionType);
-                Assert.Same(expectedChange.After, actualChange.After);
-                Assert.Same(expectedChange.Before, actualChange.Before);
+
+                if (expectedChange.Before == null)
+                {
+                    Assert.Null(actualChange.Before);
+                }
+                else
+                {
+                    Assert.NotNull(actualChange.Before);
+                    Assert.Same(expectedChange.Before.GetType(), actualChange.Before.GetType()); // TODO: Check more than type?
+                }
+
+                if (expectedChange.After == null)
+                {
+                    Assert.Null(actualChange.After);
+                }
+                else
+                {
+                    Assert.NotNull(actualChange.After);
+                    Assert.Same(expectedChange.After.GetType(), actualChange.After.GetType()); // TODO: Check more than type?
+                }
+
                 Assert.Equal(expectedChange.ChangeType, actualChange.ChangeType);
                 Assert.Equal(expectedChange.Compatibility, actualChange.Compatibility);
                 Assert.Equal(expectedChange.OperationType, actualChange.OperationType);
@@ -72,11 +92,23 @@ namespace OpenApi.Compare.Tests
         {
             var scenarios = new Tuple<Action<OpenApiDocument>, ComparisonReport, ComparisonReport>[]
             {
+                // No change.
                 Tuple.Create<Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
                     (x) =>
                     {
-                        x.Paths["/blahblah"] = new OpenApiPathItem()
+                        // Do nothing.
+                    },
+                    new ComparisonReport() { OverallCompatibility = Compatibility.NoChange },
+                    new ComparisonReport() { OverallCompatibility = Compatibility.NoChange }
+                ),
+
+                // Add/Removing Paths
+                Tuple.Create<Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    (x) =>
+                    {
+                        x.Paths["/new"] = new OpenApiPathItem()
                         {
                             Operations =
                             {
@@ -91,9 +123,37 @@ namespace OpenApi.Compare.Tests
                     },
                     new ComparisonReport()
                     {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/new",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Added,
+                                ChangeType = ChangeType.Operation,
+                                Compatibility = Compatibility.Backwards,
+                                Before = null,
+                                After = new OpenApiOperation(),
+                            }
+                        }
                     },
                     new ComparisonReport()
                     {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/new",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Removed,
+                                ChangeType = ChangeType.Operation,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiOperation(),
+                                After = null,
+                            }
+                        }
                     }
                 ),
             };
@@ -123,7 +183,7 @@ namespace OpenApi.Compare.Tests
 
         private static OpenApiDocument GetSample(string name)
         {
-            return dctSamples[name];
+            return new OpenApiStringReader().Read(dctSamples[name], out var _);
         }
     }
 }

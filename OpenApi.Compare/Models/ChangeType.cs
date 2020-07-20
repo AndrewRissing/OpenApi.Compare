@@ -7,10 +7,13 @@ namespace OpenApi.Compare
     /// </summary>
     public enum ChangeType
     {
+        // TODO: Paths?
+
         /// <summary>
         /// An <see cref="OpenApiPathItem"/> was changed.
         /// </summary>
-        Path = 0,
+        //Path = 0,
+        Operation = 0,
 
         // TODO: Flesh this out and add comments.
 
