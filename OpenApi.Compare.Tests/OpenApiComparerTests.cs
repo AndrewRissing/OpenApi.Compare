@@ -114,9 +114,6 @@ namespace OpenApi.Compare.Tests
                             {
                                 {
                                     OperationType.Get, new OpenApiOperation()
-                                    {
-                                        
-                                    }
                                 }
                             }
                         };
@@ -156,6 +153,58 @@ namespace OpenApi.Compare.Tests
                         }
                     }
                 ),
+
+                // Add/Removing Parameters
+                Tuple.Create<Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    (x) =>
+                    {
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters.Add(new OpenApiParameter()
+                        {
+                            Name = "optional",
+                            Required = false,
+                        });
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Added,
+                                ChangeType = ChangeType.Parameter,
+                                Compatibility = Compatibility.Backwards,
+                                Before = null,
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Removed,
+                                ChangeType = ChangeType.Parameter,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = null,
+                            }
+                        }
+                    }
+                ),
+
+                // TODO: Description
+                // TODO: ParameterIn
+                // TODO: Parameter - Deprecated
+                // TODO: Parameter - Required
             };
 
             foreach (var scenario in scenarios)

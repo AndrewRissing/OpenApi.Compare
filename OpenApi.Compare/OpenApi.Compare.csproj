@@ -17,11 +17,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>C:\Projects\OpenApi.Compare\OpenApi.Compare\OpenApi.Compare.xml</DocumentationFile>
+    <DocumentationFile>.\bin\$(Configuration)\$(TargetFramework)\OpenApi.Compare.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>C:\Projects\OpenApi.Compare\OpenApi.Compare\OpenApi.Compare.xml</DocumentationFile>
+    <DocumentationFile>.\bin\$(Configuration)\$(TargetFramework)\OpenApi.Compare.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
