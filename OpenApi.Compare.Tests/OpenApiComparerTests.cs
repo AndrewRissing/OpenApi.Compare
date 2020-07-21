@@ -378,6 +378,49 @@ namespace OpenApi.Compare.Tests
 
                 Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
+                    "Operation Parameter - AllowReserved",
+                    (x) =>
+                    {
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].AllowReserved = true;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterAllowReserved,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterAllowReserved,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
                     "Operation Parameter - Deprecated",
                     (x) =>
                     {
@@ -464,6 +507,49 @@ namespace OpenApi.Compare.Tests
 
                 Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
+                    "Operation Parameter - Explode",
+                    (x) =>
+                    {
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].Explode = false;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterExplode,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterExplode,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
                     "Operation Parameter - In",
                     (x) =>
                     {
@@ -540,6 +626,49 @@ namespace OpenApi.Compare.Tests
                                 OperationType = OperationType.Get,
                                 ActionType = ActionType.Modified,
                                 ChangeType = ChangeType.ParameterRequired,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Operation Parameter - Style",
+                    (x) =>
+                    {
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].Style = ParameterStyle.SpaceDelimited;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterStyle,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterStyle,
                                 Compatibility = Compatibility.Breaking,
                                 Before = new OpenApiParameter(),
                                 After = new OpenApiParameter(),
@@ -773,6 +902,49 @@ namespace OpenApi.Compare.Tests
 
                 Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
+                    "Path Parameter - AllowReserved",
+                    (x) =>
+                    {
+                        x.Paths["/pet2/{petId}"].Parameters[0].AllowReserved = true;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterAllowReserved,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterAllowReserved,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
                     "Path Parameter - Deprecated",
                     (x) =>
                     {
@@ -859,6 +1031,49 @@ namespace OpenApi.Compare.Tests
 
                 Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
+                    "Path Parameter - Explode",
+                    (x) =>
+                    {
+                        x.Paths["/pet2/{petId}"].Parameters[0].Explode = true;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterExplode,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterExplode,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
                     "Path Parameter - In",
                     (x) =>
                     {
@@ -935,6 +1150,49 @@ namespace OpenApi.Compare.Tests
                                 OperationType = null,
                                 ActionType = ActionType.Modified,
                                 ChangeType = ChangeType.ParameterRequired,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Path Parameter - Style",
+                    (x) =>
+                    {
+                        x.Paths["/pet2/{petId}"].Parameters[0].Style = ParameterStyle.SpaceDelimited;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterStyle,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterStyle,
                                 Compatibility = Compatibility.Breaking,
                                 Before = new OpenApiParameter(),
                                 After = new OpenApiParameter(),

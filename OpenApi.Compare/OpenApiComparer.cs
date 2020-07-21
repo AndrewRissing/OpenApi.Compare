@@ -8,9 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace OpenApi.Compare
 {
-    // TODO: Add a way to filter down which items you care to look for?
-    // - All or only breaking changes
-    // - Specific types (documentation, adding new parameters, etc.)?
+    // TODO: Add Security and other uncheck fields?
 
     /// <summary>
     /// The <see cref="OpenApiComparer"/> provides a means to compare OpenApi specifications to check for differences.
@@ -66,6 +64,8 @@ namespace OpenApi.Compare
             if ((before.Value != null) && (after.Value != null))
             {
                 // These only execute if the path exists in both.
+                CompareValue(innerChanges, before.Value, after.Value, ChangeType.Description, Compatibility.Backwards, x => x.Description);
+
                 MatchForComparison
                 (
                     innerChanges,
@@ -75,7 +75,6 @@ namespace OpenApi.Compare
                     (c, b, a) => CompareOpenApiParameters(c, b, a, ChangeType.PathParameter)
                 );
 
-                CompareValue(innerChanges, before.Value, after.Value, ChangeType.Description, Compatibility.Backwards, x => x.Description);
                 CompareValue(innerChanges, before.Value, after.Value, ChangeType.Summary, Compatibility.Backwards, x => x.Summary);
             }
 
@@ -118,11 +117,8 @@ namespace OpenApi.Compare
             {
                 var innerChanges = new List<Change>();
 
-                // TODO: Compare RequestBody/RequestResponses
-
                 CompareValue(innerChanges, before.Value, after.Value, ChangeType.Deprecated, Compatibility.Backwards, x => x.Deprecated);
                 CompareValue(innerChanges, before.Value, after.Value, ChangeType.Description, Compatibility.Backwards, x => x.Description);
-                CompareValue(innerChanges, before.Value, after.Value, ChangeType.Summary, Compatibility.Backwards, x => x.Summary);
 
                 MatchForComparison
                 (
@@ -132,6 +128,19 @@ namespace OpenApi.Compare
                     p => p.Name,
                     (c, b, a) => CompareOpenApiParameters(c, b, a, ChangeType.OperationParameter)
                 );
+
+                CompareOpenApiRequestBody(innerChanges, before.Value.RequestBody, after.Value.RequestBody);
+
+                MatchForComparison
+                (
+                    innerChanges,
+                    before.Value.Responses,
+                    after.Value.Responses,
+                    r => r.Key,
+                    (c, b, a) => CompareOpenApiResponse(c, b, a)
+                );
+
+                CompareValue(innerChanges, before.Value, after.Value, ChangeType.Summary, Compatibility.Backwards, x => x.Summary);
 
                 foreach (var change in innerChanges)
                     change.OperationType = before.Key;
@@ -167,12 +176,23 @@ namespace OpenApi.Compare
             else
             {
                 CompareValue(changes, before, after, ChangeType.ParameterAllowEmptyValue, (before.AllowEmptyValue) ? Compatibility.Breaking : Compatibility.Backwards, x => x.AllowEmptyValue);
+                CompareValue(changes, before, after, ChangeType.ParameterAllowReserved, (before.AllowReserved) ? Compatibility.Breaking : Compatibility.Backwards, x => x.AllowReserved);
+
+                MatchForComparison
+                (
+                    changes,
+                    before.Content,
+                    after.Content,
+                    r => r.Key,
+                    (c, b, a) => CompareOpenApiMediaType(c, b, a)
+                );
+
                 CompareValue(changes, before, after, ChangeType.Deprecated, Compatibility.Backwards, x => x.Deprecated);
                 CompareValue(changes, before, after, ChangeType.Description, Compatibility.Backwards, x => x.Description);
+                CompareValue(changes, before, after, ChangeType.ParameterExplode, Compatibility.Breaking, x => x.Explode);
                 CompareValue(changes, before, after, ChangeType.ParameterIn, Compatibility.Breaking, x => x.In);
                 CompareValue(changes, before, after, ChangeType.ParameterRequired, (before.Required) ? Compatibility.Backwards : Compatibility.Breaking, x => x.Required);
-
-                // TODO: Compare Content.
+                CompareValue(changes, before, after, ChangeType.ParameterStyle, Compatibility.Breaking, x => x.Style);
             }
         }
 
@@ -196,6 +216,22 @@ namespace OpenApi.Compare
 
                 comparer(changes, beforeMatch, afterMatch);
             }
+        }
+
+        private static void CompareOpenApiRequestBody(List<Change> changes, OpenApiRequestBody before, OpenApiRequestBody after)
+        {
+            // TODO: Flesh out and check for nulls.
+        }
+
+        private static void CompareOpenApiResponse(List<Change> changes, KeyValuePair<string, OpenApiResponse> before, KeyValuePair<string, OpenApiResponse> after)
+        {
+            // TODO: Flesh out and check for nulls.
+            // TODO: Sort out how to indicate which response code this was for?
+        }
+
+        private static void CompareOpenApiMediaType(List<Change> changes, KeyValuePair<string, OpenApiMediaType> before, KeyValuePair<string, OpenApiMediaType> after)
+        {
+            // TODO: Flesh out and check for nulls.
         }
 
         private static void CompareValue<T, TValue>(List<Change> changes, T before, T after, ChangeType changeType, Compatibility compatibility, Func<T, TValue> getValue)

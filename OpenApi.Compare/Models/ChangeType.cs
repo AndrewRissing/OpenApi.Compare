@@ -34,6 +34,16 @@ namespace OpenApi.Compare
         ParameterAllowEmptyValue,
 
         /// <summary>
+        /// The <see cref="OpenApiParameter.AllowReserved"/> of a <see cref="OpenApiParameter"/> was changed.
+        /// </summary>
+        ParameterAllowReserved,
+
+        /// <summary>
+        /// The <see cref="OpenApiParameter.Explode"/> of a <see cref="OpenApiParameter"/> was changed.
+        /// </summary>
+        ParameterExplode,
+
+        /// <summary>
         /// The <see cref="OpenApiParameter.In"/> of a <see cref="OpenApiParameter"/> was changed.
         /// </summary>
         ParameterIn,
@@ -42,6 +52,11 @@ namespace OpenApi.Compare
         /// The <see cref="OpenApiParameter.Required"/> of a <see cref="OpenApiParameter"/> was changed.
         /// </summary>
         ParameterRequired,
+
+        /// <summary>
+        /// The <see cref="OpenApiParameter.Style"/> of a <see cref="OpenApiParameter"/> was changed.
+        /// </summary>
+        ParameterStyle,
 
         /// <summary>
         /// A <see cref="OpenApiParameter"/> on a <see cref="OpenApiPathItem"/> was changed.
