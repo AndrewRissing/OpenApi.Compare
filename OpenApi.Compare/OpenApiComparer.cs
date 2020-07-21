@@ -52,12 +52,7 @@ namespace OpenApi.Compare
 
         private static void CompareOpenApiPathItems(List<Change> changes, KeyValuePair<string, OpenApiPathItem> before, KeyValuePair<string, OpenApiPathItem> after)
         {
-            // TODO: Compare OpenApiPathItem properties?
-            // Summary/Description
-            // Parameters
-
             var innerChanges = new List<Change>();
-            var path = before.Key ?? after.Key;
 
             MatchForComparison
             (
@@ -67,6 +62,24 @@ namespace OpenApi.Compare
                 kvp => kvp.Key,
                 CompareOpenApiOperations
             );
+
+            if ((before.Value != null) && (after.Value != null))
+            {
+                // These only execute if the path exists in both.
+                MatchForComparison
+                (
+                    innerChanges,
+                    before.Value.Parameters,
+                    after.Value.Parameters,
+                    p => p.Name,
+                    (c, b, a) => CompareOpenApiParameters(c, b, a, ChangeType.PathParameter)
+                );
+
+                CompareValue(innerChanges, before.Value, after.Value, ChangeType.Description, Compatibility.Backwards, x => x.Description);
+                CompareValue(innerChanges, before.Value, after.Value, ChangeType.Summary, Compatibility.Backwards, x => x.Summary);
+            }
+
+            var path = before.Key ?? after.Key;
 
             // Set the path for any changes produced from subsequent calls.
             foreach (var change in innerChanges)
@@ -117,7 +130,7 @@ namespace OpenApi.Compare
                     before.Value.Parameters,
                     after.Value.Parameters,
                     p => p.Name,
-                    CompareOpenApiParameters
+                    (c, b, a) => CompareOpenApiParameters(c, b, a, ChangeType.OperationParameter)
                 );
 
                 foreach (var change in innerChanges)
@@ -127,15 +140,15 @@ namespace OpenApi.Compare
             }
         }
 
-        private static void CompareOpenApiParameters(List<Change> changes, OpenApiParameter before, OpenApiParameter after)
+        private static void CompareOpenApiParameters(List<Change> changes, OpenApiParameter before, OpenApiParameter after, ChangeType parameterChangeType)
         {
             if (before == null)
             {
                 changes.Add(new Change()
                 {
                     ActionType = ActionType.Added,
-                    ChangeType = ChangeType.Parameter,
-                    Compatibility = Compatibility.Backwards,
+                    ChangeType = parameterChangeType,
+                    Compatibility = (after.Required) ? Compatibility.Breaking : Compatibility.Backwards,
                     Before = before,
                     After = after,
                 });
@@ -145,7 +158,7 @@ namespace OpenApi.Compare
                 changes.Add(new Change()
                 {
                     ActionType = ActionType.Removed,
-                    ChangeType = ChangeType.Parameter,
+                    ChangeType = parameterChangeType,
                     Compatibility = Compatibility.Breaking,
                     Before = before,
                     After = after,

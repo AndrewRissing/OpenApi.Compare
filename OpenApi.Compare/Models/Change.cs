@@ -32,7 +32,10 @@ namespace OpenApi.Compare
         /// <summary>
         /// The <see cref="OperationType"/> to which the change occurred.
         /// </summary>
-        public OperationType OperationType { get; set; }
+        /// <remarks>
+        /// If <see langword="null"/>, the <see cref="Change"/> is from an <see cref="OpenApiPathItem"/>.
+        /// </remarks>
+        public OperationType? OperationType { get; set; }
 
         /// <summary>
         /// The <see cref="IOpenApiElement"/> corresponding to the before <see cref="OpenApiDocument"/>.

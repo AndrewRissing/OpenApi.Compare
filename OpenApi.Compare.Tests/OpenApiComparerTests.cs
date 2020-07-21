@@ -67,7 +67,7 @@ namespace OpenApi.Compare.Tests
                 else
                 {
                     Assert.NotNull(actualChange.Before);
-                    Assert.AreSame(expectedChange.Before.GetType(), actualChange.Before.GetType()); // TODO: Check more than type?
+                    Assert.IsInstanceOf(expectedChange.Before.GetType(), actualChange.Before);
                 }
 
                 if (expectedChange.After == null)
@@ -77,7 +77,7 @@ namespace OpenApi.Compare.Tests
                 else
                 {
                     Assert.NotNull(actualChange.After);
-                    Assert.AreSame(expectedChange.After.GetType(), actualChange.After.GetType()); // TODO: Check more than type?
+                    Assert.IsInstanceOf(expectedChange.After.GetType(), actualChange.After);
                 }
 
                 Assert.AreEqual(expectedChange.ChangeType, actualChange.ChangeType);
@@ -155,7 +155,7 @@ namespace OpenApi.Compare.Tests
 
                 Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
-                    "Parameter",
+                    "Operation Optional Parameter",
                     (x) =>
                     {
                         x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters.Add(new OpenApiParameter()
@@ -174,7 +174,7 @@ namespace OpenApi.Compare.Tests
                                 Path = "/pet/findByStatus",
                                 OperationType = OperationType.Get,
                                 ActionType = ActionType.Added,
-                                ChangeType = ChangeType.Parameter,
+                                ChangeType = ChangeType.OperationParameter,
                                 Compatibility = Compatibility.Backwards,
                                 Before = null,
                                 After = new OpenApiParameter(),
@@ -191,7 +191,7 @@ namespace OpenApi.Compare.Tests
                                 Path = "/pet/findByStatus",
                                 OperationType = OperationType.Get,
                                 ActionType = ActionType.Removed,
-                                ChangeType = ChangeType.Parameter,
+                                ChangeType = ChangeType.OperationParameter,
                                 Compatibility = Compatibility.Breaking,
                                 Before = new OpenApiParameter(),
                                 After = null,
@@ -202,53 +202,14 @@ namespace OpenApi.Compare.Tests
 
                 Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
-                    "Parameter - Description",
+                    "Operation Required Parameter",
                     (x) =>
                     {
-                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].Description = "Something new";
-                    },
-                    new ComparisonReport()
-                    {
-                        OverallCompatibility = Compatibility.Backwards,
-                        Changes =
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters.Add(new OpenApiParameter()
                         {
-                            new Change()
-                            {
-                                Path = "/pet/findByStatus",
-                                OperationType = OperationType.Get,
-                                ActionType = ActionType.Modified,
-                                ChangeType = ChangeType.Description,
-                                Compatibility = Compatibility.Backwards,
-                                Before = new OpenApiParameter(),
-                                After = new OpenApiParameter(),
-                            }
-                        }
-                    },
-                    new ComparisonReport()
-                    {
-                        OverallCompatibility = Compatibility.Backwards,
-                        Changes =
-                        {
-                            new Change()
-                            {
-                                Path = "/pet/findByStatus",
-                                OperationType = OperationType.Get,
-                                ActionType = ActionType.Modified,
-                                ChangeType = ChangeType.Description,
-                                Compatibility = Compatibility.Backwards,
-                                Before = new OpenApiParameter(),
-                                After = new OpenApiParameter(),
-                            }
-                        }
-                    }
-                ),
-
-                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
-                (
-                    "Parameter - In",
-                    (x) =>
-                    {
-                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].In = ParameterLocation.Header;
+                            Name = "required",
+                            Required = true,
+                        });
                     },
                     new ComparisonReport()
                     {
@@ -259,10 +220,10 @@ namespace OpenApi.Compare.Tests
                             {
                                 Path = "/pet/findByStatus",
                                 OperationType = OperationType.Get,
-                                ActionType = ActionType.Modified,
-                                ChangeType = ChangeType.ParameterIn,
+                                ActionType = ActionType.Added,
+                                ChangeType = ChangeType.OperationParameter,
                                 Compatibility = Compatibility.Breaking,
-                                Before = new OpenApiParameter(),
+                                Before = null,
                                 After = new OpenApiParameter(),
                             }
                         }
@@ -276,8 +237,51 @@ namespace OpenApi.Compare.Tests
                             {
                                 Path = "/pet/findByStatus",
                                 OperationType = OperationType.Get,
+                                ActionType = ActionType.Removed,
+                                ChangeType = ChangeType.OperationParameter,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = null,
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Operation Parameter - AllowEmptyValue",
+                    (x) =>
+                    {
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].AllowEmptyValue = true;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
                                 ActionType = ActionType.Modified,
-                                ChangeType = ChangeType.ParameterIn,
+                                ChangeType = ChangeType.ParameterAllowEmptyValue,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterAllowEmptyValue,
                                 Compatibility = Compatibility.Breaking,
                                 Before = new OpenApiParameter(),
                                 After = new OpenApiParameter(),
@@ -288,7 +292,7 @@ namespace OpenApi.Compare.Tests
 
                 Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
-                    "Parameter - Deprecated",
+                    "Operation Parameter - Deprecated",
                     (x) =>
                     {
                         x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].Deprecated = true;
@@ -331,7 +335,93 @@ namespace OpenApi.Compare.Tests
 
                 Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
-                    "Parameter - Required",
+                    "Operation Parameter - Description",
+                    (x) =>
+                    {
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].Description = "Something new";
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Description,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Description,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Operation Parameter - In",
+                    (x) =>
+                    {
+                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].In = ParameterLocation.Header;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterIn,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet/findByStatus",
+                                OperationType = OperationType.Get,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterIn,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Operation Parameter - Required",
                     (x) =>
                     {
                         x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].Required = false;
@@ -372,12 +462,12 @@ namespace OpenApi.Compare.Tests
                     }
                 ),
 
-                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+               Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
                 (
-                    "Parameter - AllowEmptyValue",
+                    "Path Description",
                     (x) =>
                     {
-                        x.Paths["/pet/findByStatus"].Operations[OperationType.Get].Parameters[0].AllowEmptyValue = true;
+                        x.Paths["/pet2/{petId}"].Description = "changed";
                     },
                     new ComparisonReport()
                     {
@@ -386,8 +476,145 @@ namespace OpenApi.Compare.Tests
                         {
                             new Change()
                             {
-                                Path = "/pet/findByStatus",
-                                OperationType = OperationType.Get,
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Description,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiPathItem(),
+                                After = new OpenApiPathItem(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Description,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiPathItem(),
+                                After = new OpenApiPathItem(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Path Optional Parameter",
+                    (x) =>
+                    {
+                        x.Paths["/pet2/{petId}"].Parameters.Add(new OpenApiParameter()
+                        {
+                            Name = "optional",
+                            Required = false,
+                        });
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Added,
+                                ChangeType = ChangeType.PathParameter,
+                                Compatibility = Compatibility.Backwards,
+                                Before = null,
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Removed,
+                                ChangeType = ChangeType.PathParameter,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = null,
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Path Required Parameter",
+                    (x) =>
+                    {
+                        x.Paths["/pet2/{petId}"].Parameters.Add(new OpenApiParameter()
+                        {
+                            Name = "required",
+                            Required = true,
+                        });
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Added,
+                                ChangeType = ChangeType.PathParameter,
+                                Compatibility = Compatibility.Breaking,
+                                Before = null,
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Removed,
+                                ChangeType = ChangeType.PathParameter,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = null,
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Path Parameter - AllowEmptyValue",
+                    (x) =>
+                    {
+                        x.Paths["/pet2/{petId}"].Parameters[0].AllowEmptyValue = true;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
                                 ActionType = ActionType.Modified,
                                 ChangeType = ChangeType.ParameterAllowEmptyValue,
                                 Compatibility = Compatibility.Backwards,
@@ -403,13 +630,228 @@ namespace OpenApi.Compare.Tests
                         {
                             new Change()
                             {
-                                Path = "/pet/findByStatus",
-                                OperationType = OperationType.Get,
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
                                 ActionType = ActionType.Modified,
                                 ChangeType = ChangeType.ParameterAllowEmptyValue,
                                 Compatibility = Compatibility.Breaking,
                                 Before = new OpenApiParameter(),
                                 After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Path Parameter - Deprecated",
+                    (x) =>
+                    {
+                        x.Paths["/pet2/{petId}"].Parameters[0].Deprecated = true;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Deprecated,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Deprecated,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Path Parameter - Description",
+                    (x) =>
+                    {
+                        x.Paths["/pet2/{petId}"].Parameters[0].Description = "Something new";
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Description,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Description,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Path Parameter - In",
+                    (x) =>
+                    {
+                        x.Paths["/pet2/{petId}"].Parameters[0].In = ParameterLocation.Header;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterIn,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterIn,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+                Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Path Parameter - Required",
+                    (x) =>
+                    {
+                        x.Paths["/pet2/{petId}"].Parameters[0].Required = false;
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterRequired,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Breaking,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.ParameterRequired,
+                                Compatibility = Compatibility.Breaking,
+                                Before = new OpenApiParameter(),
+                                After = new OpenApiParameter(),
+                            }
+                        }
+                    }
+                ),
+
+               Tuple.Create<string, Action<OpenApiDocument>, ComparisonReport, ComparisonReport>
+                (
+                    "Path Summary",
+                    (x) =>
+                    {
+                        x.Paths["/pet2/{petId}"].Summary = "changed";
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Summary,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiPathItem(),
+                                After = new OpenApiPathItem(),
+                            }
+                        }
+                    },
+                    new ComparisonReport()
+                    {
+                        OverallCompatibility = Compatibility.Backwards,
+                        Changes =
+                        {
+                            new Change()
+                            {
+                                Path = "/pet2/{petId}",
+                                OperationType = null,
+                                ActionType = ActionType.Modified,
+                                ChangeType = ChangeType.Summary,
+                                Compatibility = Compatibility.Backwards,
+                                Before = new OpenApiPathItem(),
+                                After = new OpenApiPathItem(),
                             }
                         }
                     }

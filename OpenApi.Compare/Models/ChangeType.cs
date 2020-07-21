@@ -3,16 +3,11 @@ using Microsoft.OpenApi.Models;
 
 namespace OpenApi.Compare
 {
-    // TODO: Flesh this out and add comments.
-
     /// <summary>
     /// <see cref="ChangeType"/> describes the type of change that occurred.
     /// </summary>
     public enum ChangeType
     {
-        // TODO: Paths?
-        //Path = 0,
-
         /// <summary>
         /// The deprecated status of the provided <see cref="IOpenApiElement"/> was changed.
         /// </summary>
@@ -29,9 +24,9 @@ namespace OpenApi.Compare
         Operation,
 
         /// <summary>
-        /// A <see cref="OpenApiParameter"/> was changed.
+        /// A <see cref="OpenApiParameter"/> on a <see cref="OpenApiOperation"/> was changed.
         /// </summary>
-        Parameter,
+        OperationParameter,
 
         /// <summary>
         /// The <see cref="OpenApiParameter.AllowEmptyValue"/> of a <see cref="OpenApiParameter"/> was changed.
@@ -47,6 +42,11 @@ namespace OpenApi.Compare
         /// The <see cref="OpenApiParameter.Required"/> of a <see cref="OpenApiParameter"/> was changed.
         /// </summary>
         ParameterRequired,
+
+        /// <summary>
+        /// A <see cref="OpenApiParameter"/> on a <see cref="OpenApiPathItem"/> was changed.
+        /// </summary>
+        PathParameter,
 
         /// <summary>
         /// The summary of the provided <see cref="IOpenApiElement"/> was changed.
