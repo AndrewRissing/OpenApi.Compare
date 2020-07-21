@@ -118,11 +118,11 @@ namespace OpenApi.Compare
             {
                 var innerChanges = new List<Change>();
 
-                // TODO: Compare OpenApiOperation properties.
-                // Summary/Description
-                // RequestBody
-                // RequestResponses
-                // Deprecated
+                // TODO: Compare RequestBody/RequestResponses
+
+                CompareValue(innerChanges, before.Value, after.Value, ChangeType.Deprecated, Compatibility.Backwards, x => x.Deprecated);
+                CompareValue(innerChanges, before.Value, after.Value, ChangeType.Description, Compatibility.Backwards, x => x.Description);
+                CompareValue(innerChanges, before.Value, after.Value, ChangeType.Summary, Compatibility.Backwards, x => x.Summary);
 
                 MatchForComparison
                 (
