@@ -19,5 +19,10 @@
         /// The change would impact client behavior.
         /// </summary>
         Breaking,
+
+        /// <summary>
+        /// The change would potentially impact client behavior.
+        /// </summary>
+        PotentiallyBreaking,
     }
 }

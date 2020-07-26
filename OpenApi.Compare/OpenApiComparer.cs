@@ -1,4 +1,5 @@
-﻿using Microsoft.OpenApi.Interfaces;
+﻿using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 using OpenApi.Compare.Models;
 using System;
@@ -184,16 +185,387 @@ namespace OpenApi.Compare
                     before.Content,
                     after.Content,
                     r => r.Key,
-                    (c, b, a) => CompareOpenApiMediaType(c, b, a)
+                    (c, b, a) => CompareOpenApiContent(c, b, a, ChangeType.ParameterContentMediaType, ChangeType.ParameterContentStructure, ChangeType.ParameterContentEncoding, ChangeType.ParameterContentExample)
                 );
 
                 CompareValue(changes, before, after, ChangeType.Deprecated, Compatibility.Backwards, x => x.Deprecated);
                 CompareValue(changes, before, after, ChangeType.Description, Compatibility.Backwards, x => x.Description);
+                CompareOpenApiExampleValue(changes, before.Example, after.Example, ChangeType.ParameterExample);
+
+                MatchForComparison
+                (
+                    changes,
+                    before.Examples,
+                    after.Examples,
+                    r => r.Key,
+                    (c, b, a) => CompareOpenApiExampleMediaType(c, b, a, ChangeType.ParameterExample)
+                );
+
                 CompareValue(changes, before, after, ChangeType.ParameterExplode, Compatibility.Breaking, x => x.Explode);
                 CompareValue(changes, before, after, ChangeType.ParameterIn, Compatibility.Breaking, x => x.In);
                 CompareValue(changes, before, after, ChangeType.ParameterRequired, (before.Required) ? Compatibility.Backwards : Compatibility.Breaking, x => x.Required);
+                CompareOpenApiSchema(changes, before.Schema, after.Schema, ChangeType.ParameterSchema);
                 CompareValue(changes, before, after, ChangeType.ParameterStyle, Compatibility.Breaking, x => x.Style);
             }
+        }
+
+        private static void CompareOpenApiRequestBody(List<Change> changes, OpenApiRequestBody before, OpenApiRequestBody after)
+        {
+            if ((before == null) && (after == null))
+            {
+                // No change.  Ignore.
+            }
+            else if (before == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Added,
+                    ChangeType = ChangeType.RequestBody,
+                    Compatibility = (after.Required) ? Compatibility.Breaking : Compatibility.Backwards,
+                    Before = before,
+                    After = after,
+                });
+            }
+            else if (after == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Removed,
+                    ChangeType = ChangeType.RequestBody,
+                    Compatibility = Compatibility.Breaking,
+                    Before = before,
+                    After = after,
+                });
+            }
+            else
+            {
+                CompareValue(changes, before, after, ChangeType.Description, Compatibility.Backwards, x => x.Description);
+                CompareValue(changes, before, after, ChangeType.RequestBodyRequired, (before.Required) ? Compatibility.Backwards : Compatibility.Breaking, x => x.Required);
+
+                MatchForComparison
+                (
+                    changes,
+                    before.Content,
+                    after.Content,
+                    r => r.Key,
+                    (c, b, a) => CompareOpenApiContent(c, b, a, ChangeType.RequestBodyContentMediaType, ChangeType.RequestBodyContentStructure, ChangeType.RequestBodyContentEncoding, ChangeType.RequestBodyContentExample)
+                );
+            }
+        }
+
+        private static void CompareOpenApiResponse(List<Change> changes, KeyValuePair<string, OpenApiResponse> before, KeyValuePair<string, OpenApiResponse> after)
+        {
+            if (before.Value == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Added,
+                    ChangeType = ChangeType.Response,
+                    Compatibility = IsSuccessfulStatusCode(after.Key) ? Compatibility.Breaking : Compatibility.PotentiallyBreaking,
+                    HttpStatusCode = after.Key,
+                    Before = null,
+                    After = after.Value,
+                });
+            }
+            else if (after.Value == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Removed,
+                    ChangeType = ChangeType.Response,
+                    Compatibility = IsSuccessfulStatusCode(before.Key) ? Compatibility.Breaking : Compatibility.PotentiallyBreaking,
+                    HttpStatusCode = before.Key,
+                    Before = before.Value,
+                    After = null,
+                });
+            }
+            else
+            {
+                var innerChanges = new List<Change>();
+
+                MatchForComparison
+                (
+                    innerChanges,
+                    before.Value.Content,
+                    after.Value.Content,
+                    r => r.Key,
+                    (c, b, a) => CompareOpenApiContent(c, b, a, ChangeType.ResponseContentMediaType, ChangeType.ResponseContentStructure, ChangeType.ResponseContentEncoding, ChangeType.ResponseContentExample)
+                );
+
+                CompareValue(innerChanges, before.Value, after.Value, ChangeType.Description, Compatibility.Backwards, x => x.Description);
+
+                MatchForComparison
+                (
+                    innerChanges,
+                    before.Value.Headers,
+                    after.Value.Headers,
+                    r => r.Key,
+                    (c, b, a) => CompareOpenApiResponseHeader(c, b, a)
+                );
+
+                foreach (var change in innerChanges)
+                    change.HttpStatusCode = before.Key;
+
+                changes.AddRange(innerChanges);
+            }
+        }
+
+        internal static bool IsSuccessfulStatusCode(string statusCode)
+        {
+            return (int.TryParse(statusCode, out var value) && (value >= 200) && (value <= 299));
+        }
+
+        private static void CompareOpenApiResponseHeader(List<Change> changes, KeyValuePair<string, OpenApiHeader> before, KeyValuePair<string, OpenApiHeader> after)
+        {
+            if (before.Value == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Added,
+                    ChangeType = ChangeType.ResponseHeader,
+                    Compatibility = Compatibility.Backwards,
+                    ResponseHeader = after.Key,
+                    Before = null,
+                    After = after.Value,
+                });
+            }
+            else if (after.Value == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Removed,
+                    ChangeType = ChangeType.ResponseHeader,
+                    Compatibility = Compatibility.Breaking,
+                    ResponseHeader = before.Key,
+                    Before = before.Value,
+                    After = null,
+                });
+            }
+            else
+            {
+                var innerChanges = new List<Change>();
+
+                CompareValue(changes, before.Value, after.Value, ChangeType.ResponseHeaderAllowEmptyValue, (before.Value.AllowEmptyValue) ? Compatibility.Breaking : Compatibility.Backwards, x => x.AllowEmptyValue);
+                CompareValue(changes, before.Value, after.Value, ChangeType.ResponseHeaderAllowReserved, (before.Value.AllowReserved) ? Compatibility.Breaking : Compatibility.Backwards, x => x.AllowReserved);
+
+                MatchForComparison
+                (
+                    changes,
+                    before.Value.Content,
+                    after.Value.Content,
+                    r => r.Key,
+                    (c, b, a) => CompareOpenApiContent(c, b, a, ChangeType.ResponseHeaderContentMediaType, ChangeType.ResponseHeaderContentStructure, ChangeType.ResponseHeaderContentEncoding, ChangeType.ResponseHeaderContentExample)
+                );
+
+                CompareValue(changes, before.Value, after.Value, ChangeType.Deprecated, Compatibility.Backwards, x => x.Deprecated);
+                CompareValue(changes, before.Value, after.Value, ChangeType.Description, Compatibility.Backwards, x => x.Description);
+                CompareOpenApiExampleValue(changes, before.Value.Example, after.Value.Example, ChangeType.ResponseHeaderExample);
+
+                MatchForComparison
+                (
+                    changes,
+                    before.Value.Examples,
+                    after.Value.Examples,
+                    r => r.Key,
+                    (c, b, a) => CompareOpenApiExampleMediaType(c, b, a, ChangeType.ResponseHeaderExample)
+                );
+
+                CompareValue(changes, before.Value, after.Value, ChangeType.ResponseHeaderExplode, Compatibility.Breaking, x => x.Explode);
+                CompareValue(changes, before.Value, after.Value, ChangeType.ResponseHeaderRequired, (before.Value.Required) ? Compatibility.Backwards : Compatibility.Breaking, x => x.Required);
+                CompareOpenApiSchema(changes, before.Value.Schema, after.Value.Schema, ChangeType.ParameterSchema);
+                CompareValue(changes, before.Value, after.Value, ChangeType.ParameterStyle, Compatibility.Breaking, x => x.Style);
+
+                foreach (var change in innerChanges)
+                    change.ResponseHeader = before.Key;
+
+                changes.AddRange(innerChanges);
+            }
+        }
+
+        private static void CompareOpenApiContent(List<Change> changes, KeyValuePair<string, OpenApiMediaType> before, KeyValuePair<string, OpenApiMediaType> after, ChangeType mediaTypeChange, ChangeType structureChange, ChangeType encodingChange, ChangeType exampleChange)
+        {
+            if (before.Value == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Added,
+                    ChangeType = mediaTypeChange,
+                    Compatibility = Compatibility.Backwards,
+                    MediaType = after.Key,
+                    Before = null,
+                    After = after.Value,
+                });
+            }
+            else if (after.Value == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Removed,
+                    ChangeType = mediaTypeChange,
+                    Compatibility = Compatibility.Breaking,
+                    MediaType = before.Key,
+                    Before = before.Value,
+                    After = null,
+                });
+            }
+            else
+            {
+                var innerChanges = new List<Change>();
+
+                MatchForComparison
+                (
+                    innerChanges,
+                    before.Value.Encoding,
+                    after.Value.Encoding,
+                    r => r.Key,
+                    (c, b, a) => CompareOpenApiEncoding(c, b, a, encodingChange)
+                );
+
+                CompareOpenApiExampleValue(innerChanges, before.Value.Example, after.Value.Example, exampleChange);
+
+                MatchForComparison
+                (
+                    innerChanges,
+                    before.Value.Examples,
+                    after.Value.Examples,
+                    r => r.Key,
+                    (c, b, a) => CompareOpenApiExampleMediaType(c, b, a, exampleChange)
+                );
+
+                CompareOpenApiSchema(innerChanges, before.Value.Schema, after.Value.Schema, structureChange);
+
+                foreach (var change in innerChanges)
+                    change.MediaType = before.Key;
+
+                changes.AddRange(innerChanges);
+            }
+        }
+
+        private static void CompareOpenApiEncoding(List<Change> changes, KeyValuePair<string, OpenApiEncoding> before, KeyValuePair<string, OpenApiEncoding> after, ChangeType encodingChange)
+        {
+            if (before.Value == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Added,
+                    ChangeType = encodingChange,
+                    Compatibility = Compatibility.Breaking,
+                    MediaType = after.Key,
+                    Before = null,
+                    After = after.Value,
+                });
+            }
+            else if (after.Value == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Removed,
+                    ChangeType = encodingChange,
+                    Compatibility = Compatibility.Breaking,
+                    MediaType = before.Key,
+                    Before = before.Value,
+                    After = null,
+                });
+            }
+            else
+            {
+                var innerChanges = new List<Change>();
+
+                // TODO: Review the following logic in more detail.
+                // TODO: Break out these encoding changes into smaller types?
+                CompareValue(innerChanges, before.Value, after.Value, encodingChange, (before.Value.AllowReserved ?? false) ? Compatibility.Breaking : Compatibility.Backwards, x => x.AllowReserved);
+                CompareValue(innerChanges, before.Value, after.Value, encodingChange, Compatibility.Breaking, x => x.ContentType);
+                CompareValue(innerChanges, before.Value, after.Value, encodingChange, Compatibility.Breaking, x => x.Explode);
+
+                // TODO: Headers
+
+                CompareValue(innerChanges, before.Value, after.Value, encodingChange, Compatibility.Breaking, x => x.Style);
+
+                foreach (var change in innerChanges)
+                    change.EncodingPropertyName = before.Key;
+
+                changes.AddRange(innerChanges);
+            }
+        }
+
+        private static void CompareOpenApiExampleMediaType(List<Change> changes, KeyValuePair<string, OpenApiExample> before, KeyValuePair<string, OpenApiExample> after, ChangeType changeType)
+        {
+            if (before.Value == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Added,
+                    ChangeType = changeType,
+                    Compatibility = Compatibility.Backwards,
+                    MediaType = after.Key,
+                    Before = null,
+                    After = after.Value,
+                });
+            }
+            else if (after.Value == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Removed,
+                    ChangeType = changeType,
+                    Compatibility = Compatibility.Backwards,
+                    MediaType = before.Key,
+                    Before = before.Value,
+                    After = null,
+                });
+            }
+            else
+            {
+                var innerChanges = new List<Change>();
+
+                CompareValue(innerChanges, before.Value, after.Value, ChangeType.Description, Compatibility.Backwards, x => x.Description);
+                CompareValue(innerChanges, before.Value, after.Value, ChangeType.Summary, Compatibility.Backwards, x => x.Summary);
+                CompareOpenApiExampleValue(innerChanges, before.Value.Value, after.Value.Value, changeType);
+
+                foreach (var change in innerChanges)
+                    change.MediaType = before.Key;
+
+                changes.AddRange(innerChanges);
+            }
+        }
+
+        private static void CompareOpenApiExampleValue(List<Change> changes, IOpenApiAny before, IOpenApiAny after, ChangeType changeType)
+        {
+            if ((before == null) && (after == null))
+            {
+                // No change.  Ignore.
+            }
+            else if (before == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Added,
+                    ChangeType = changeType,
+                    Compatibility = Compatibility.Backwards,
+                    Before = before,
+                    After = after,
+                });
+            }
+            else if (after == null)
+            {
+                changes.Add(new Change()
+                {
+                    ActionType = ActionType.Removed,
+                    ChangeType = changeType,
+                    Compatibility = Compatibility.Backwards,
+                    Before = before,
+                    After = after,
+                });
+            }
+            else
+            {
+                // TODO: Compare values.
+            }
+        }
+
+        private static void CompareOpenApiSchema(List<Change> changes, OpenApiSchema before, OpenApiSchema after, ChangeType changeType)
+        {
+            // TODO: Flesh out and check for nulls (both nulls)
         }
 
         private static void MatchForComparison<T, TKey>
@@ -216,22 +588,6 @@ namespace OpenApi.Compare
 
                 comparer(changes, beforeMatch, afterMatch);
             }
-        }
-
-        private static void CompareOpenApiRequestBody(List<Change> changes, OpenApiRequestBody before, OpenApiRequestBody after)
-        {
-            // TODO: Flesh out and check for nulls.
-        }
-
-        private static void CompareOpenApiResponse(List<Change> changes, KeyValuePair<string, OpenApiResponse> before, KeyValuePair<string, OpenApiResponse> after)
-        {
-            // TODO: Flesh out and check for nulls.
-            // TODO: Sort out how to indicate which response code this was for?
-        }
-
-        private static void CompareOpenApiMediaType(List<Change> changes, KeyValuePair<string, OpenApiMediaType> before, KeyValuePair<string, OpenApiMediaType> after)
-        {
-            // TODO: Flesh out and check for nulls.
         }
 
         private static void CompareValue<T, TValue>(List<Change> changes, T before, T after, ChangeType changeType, Compatibility compatibility, Func<T, TValue> getValue)

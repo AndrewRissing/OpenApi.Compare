@@ -38,6 +38,38 @@ namespace OpenApi.Compare
         public OperationType? OperationType { get; set; }
 
         /// <summary>
+        /// The media type of the changed area.
+        /// </summary>
+        /// <remarks>
+        /// The value may be null for changes that are not related to a media type.
+        /// </remarks>
+        public string MediaType { get; set; }
+
+        /// <summary>
+        /// The HTTP Status Code related to the given change.
+        /// </summary>
+        /// <remarks>
+        /// The value may be null for changes that are not related to an HTTP Status Code.
+        /// </remarks>
+        public string HttpStatusCode { get; set; }
+
+        /// <summary>
+        /// The name of the Response header related to the given change.
+        /// </summary>
+        /// <remarks>
+        /// The value may be null for changes that are not related to a response header.
+        /// </remarks>
+        public string ResponseHeader { get; set; }
+
+        /// <summary>
+        /// The name of the property whose encoding has changed.
+        /// </summary>
+        /// <remarks>
+        /// The value may be null for changes that are not related to an encoding change.
+        /// </remarks>
+        public string EncodingPropertyName { get; set; }
+
+        /// <summary>
         /// The <see cref="IOpenApiElement"/> corresponding to the before <see cref="OpenApiDocument"/>.
         /// </summary>
         /// <remarks>

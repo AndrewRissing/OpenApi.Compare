@@ -38,6 +38,20 @@ namespace OpenApi.Compare.Tests
             }
         }
 
+        [TestCase(null, false)]
+        [TestCase("", false)]
+        [TestCase("abc", false)]
+        [TestCase("199", false)]
+        [TestCase("200", true)]
+        [TestCase("201", true)]
+        [TestCase("250", true)]
+        [TestCase("299", true)]
+        [TestCase("300", false)]
+        public void IsSuccessfulStatusCode(string input, bool expected)
+        {
+            Assert.AreEqual(expected, OpenApiComparer.IsSuccessfulStatusCode(input));
+        }
+
         [TestCaseSource(nameof(SimpleScenariosData))]
         public void SimpleScenarios(OpenApiDocument before, OpenApiDocument after, ComparisonReport expected)
         {
@@ -84,6 +98,10 @@ namespace OpenApi.Compare.Tests
                 Assert.AreEqual(expectedChange.Compatibility, actualChange.Compatibility);
                 Assert.AreEqual(expectedChange.OperationType, actualChange.OperationType);
                 Assert.AreEqual(expectedChange.Path, actualChange.Path);
+                Assert.AreEqual(expectedChange.MediaType, actualChange.MediaType);
+                Assert.AreEqual(expectedChange.HttpStatusCode, actualChange.HttpStatusCode);
+                Assert.AreEqual(expectedChange.ResponseHeader, actualChange.ResponseHeader);
+                Assert.AreEqual(expectedChange.EncodingPropertyName, actualChange.EncodingPropertyName);
             }
         }
 
@@ -1243,6 +1261,76 @@ namespace OpenApi.Compare.Tests
                         }
                     }
                 ),
+
+               // TODO: Add tests for ParameterContentEncoding.
+               // TODO: Add tests for ParameterContentEncoding - AllowReserved
+               // TODO: Add tests for ParameterContentEncoding - ContentType
+               // TODO: Add tests for ParameterContentEncoding - Explode
+               // TODO: Add tests for ParameterContentEncoding - Style
+               // TODO: Add tests for ParameterContentExample - MediaType
+               // TODO: Add tests for ParameterContentExample - Description
+               // TODO: Add tests for ParameterContentExample - Summary
+               // TODO: Add tests for ParameterContentExample - Value
+               // TODO: Add tests for ParameterContentMediaType.
+               // TODO: Add tests for ParameterContentStructure.
+               // TODO: Add tests for ParameterExample for Example - MediaType
+               // TODO: Add tests for ParameterExample for Example - Description
+               // TODO: Add tests for ParameterExample for Example - Summary
+               // TODO: Add tests for ParameterExample for Example - Value
+               // TODO: Add tests for ParameterExample for Examples - MediaType
+               // TODO: Add tests for ParameterExample for Examples - Description
+               // TODO: Add tests for ParameterExample for Examples - Summary
+               // TODO: Add tests for ParameterExample for Examples - Value
+               // TODO: Add tests for RequestBody.
+               // TODO: Add tests for RequestBodyContentEncoding.
+               // TODO: Add tests for RequestBodyContentEncoding - AllowReserved
+               // TODO: Add tests for RequestBodyContentEncoding - ContentType
+               // TODO: Add tests for RequestBodyContentEncoding - Explode
+               // TODO: Add tests for RequestBodyContentEncoding - Style
+               // TODO: Add tests for RequestBodyContentExample - MediaType
+               // TODO: Add tests for RequestBodyContentExample - Description
+               // TODO: Add tests for RequestBodyContentExample - Summary
+               // TODO: Add tests for RequestBodyContentExample - Value
+               // TODO: Add tests for RequestBodyContentMediaType.
+               // TODO: Add tests for RequestBodyContentStructure.
+               // TODO: Add tests for RequestBody.Description.
+               // TODO: Add tests for RequestBody.Required.
+               // TODO: Add tests for Response (2XX).
+               // TODO: Add tests for Response (3XX, 4XX, 5XX).
+               // TODO: Add tests for ResponseContentEncoding.
+               // TODO: Add tests for ResponseContentEncoding - AllowReserved
+               // TODO: Add tests for ResponseContentEncoding - ContentType
+               // TODO: Add tests for ResponseContentEncoding - Explode
+               // TODO: Add tests for ResponseContentEncoding - Style
+               // TODO: Add tests for ResponseContentExample - MediaType
+               // TODO: Add tests for ResponseContentExample - Description
+               // TODO: Add tests for ResponseContentExample - Summary
+               // TODO: Add tests for ResponseContentExample - Value
+               // TODO: Add tests for ResponseContentMediaType.
+               // TODO: Add tests for ResponseContentStructure.
+               // TODO: Add tests for Response.Description.
+               // TODO: Add tests for ResponseHeader.
+               // TODO: Add tests for ResponseHeaderAllowEmptyValue.
+               // TODO: Add tests for ResponseHeaderAllowReserved.
+               // TODO: Add tests for ResponseHeaderContentEncoding.
+               // TODO: Add tests for ResponseHeaderContentEncoding - AllowReserved
+               // TODO: Add tests for ResponseHeaderContentEncoding - ContentType
+               // TODO: Add tests for ResponseHeaderContentEncoding - Explode
+               // TODO: Add tests for ResponseHeaderContentEncoding - Style
+               // TODO: Add tests for ResponseHeaderContentExample - MediaType
+               // TODO: Add tests for ResponseHeaderContentExample - Description
+               // TODO: Add tests for ResponseHeaderContentExample - Summary
+               // TODO: Add tests for ResponseHeaderContentExample - Value
+               // TODO: Add tests for ResponseHeaderContentMediaType.
+               // TODO: Add tests for ResponseHeaderContentStructure.
+               // TODO: Add tests for ResponseHeaderExample - MediaType
+               // TODO: Add tests for ResponseHeaderExample - Description
+               // TODO: Add tests for ResponseHeaderExample - Summary
+               // TODO: Add tests for ResponseHeaderExample - Value
+               // TODO: Add tests for ResponseHeaderExplode.
+               // TODO: Add tests for ResponseHeaderRequired.
+               // TODO: Add tests for ResponseHeaderSchema.
+               // TODO: Add tests for ResponseHeaderStyle.
             };
 
             foreach (var scenario in scenarios)
